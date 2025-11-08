@@ -13,5 +13,5 @@ export function LogoutButton() {
 			return;
 		}
 	};
-	return <Button onClick={logout}>Logout</Button>;
+	return <Button variant={"ghost"} className="" onClick={logout}>Logout</Button>;
 }

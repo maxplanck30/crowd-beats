@@ -56,27 +56,8 @@ export function UserBtn({ user }: { user: User }) {
             <Link href={"/profile"}>Profile</Link>
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer">
-            Settings
+             <Link href={"/rooms"}>Rooms</Link>
           </DropdownMenuItem>
-          {/* New Rooms */}
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              Room
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem className="cursor-pointer">
-                  Create
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  Join
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem

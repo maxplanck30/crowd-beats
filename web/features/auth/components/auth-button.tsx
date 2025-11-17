@@ -1,12 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
 import { authClient } from "@/lib/auth-client";
 
 export function AuthButton() {
+	const router = useRouter();
 	const signIn = async () => {
 		const data = await authClient.signIn.social({
 			provider: "google",
@@ -15,6 +17,8 @@ export function AuthButton() {
 			console.log(data.error.message);
 			return;
 		}
+		
+		router.push("/room")
 	};
 
 	return (

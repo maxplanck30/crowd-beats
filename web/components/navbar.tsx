@@ -37,7 +37,7 @@ export function Navbar({ className }: { className: string }) {
               </Link>
             </Button>
           )}
-          <ModeToggle className="hidden md:inline" iconClassName="items-center justify-center" />
+          <ModeToggle className="hidden md:inline" />
         </div>
       </Container>
     </header>

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -17,37 +18,65 @@ import { PlusCircleIcon, Loader2 } from "lucide-react";
 import { backendUrl } from "@/lib/backend";
 import { Spinner } from "@/components/ui/spinner";
 
-export function AddSongButton() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [videos, setVideos] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+// Custom hook for debouncing a value with specified delay
+function useDebounce(value: string, delay: number = 200) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm.trim());
-    }, 200);
+      setDebouncedValue(value.trim());
+    }, delay);
 
+    // Cleanup previous timeout if value changes before delay ends
     return () => {
       clearTimeout(handler);
     };
-  }, [searchTerm]);
+  }, [value, delay]);
 
-  // Trigger search when debouncedSearchTerm changes
+  return debouncedValue;
+}
+
+export function AddSongButton() {
+  // State to hold user input from the search field
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Debounced search term to control API calls frequency
+  const debouncedSearchTerm = useDebounce(searchTerm);
+
+  // State to hold fetched videos from backend API
+  const [videos, setVideos] = useState<any[]>([]);
+
+  // Loading state to indicate fetch in progress
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Error state to show any fetch errors
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch videos from backend API whenever debouncedSearchTerm changes
   useEffect(() => {
+    // Clear videos and errors if search term is empty
     if (!debouncedSearchTerm) {
       setVideos([]);
       setError(null);
       return;
     }
+
+    // Async function to fetch videos
     const fetchVideos = async () => {
       setIsLoading(true);
       setError(null);
+
       try {
+        // Call backend API with encoded search term
         const response = await fetch(
-          backendUrl + `/api/search/yt/${searchTerm}`
+          backendUrl +
+            `/api/search/yt/${encodeURIComponent(debouncedSearchTerm)}`
         );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch videos");
+        }
+
         const res = await response.json();
         setVideos(res.data || []);
       } catch {
@@ -62,7 +91,14 @@ export function AddSongButton() {
   }, [debouncedSearchTerm]);
 
   return (
-    <Drawer>
+    <Drawer
+      onClose={() => {
+        setSearchTerm("");
+      }}
+      onOpenChange={() => {
+        setSearchTerm("");
+      }}
+    >
       <DrawerTrigger asChild>
         <Button
           variant="default"
@@ -83,15 +119,19 @@ export function AddSongButton() {
             </DrawerDescription>
           </DrawerHeader>
           <div className="w-full flex flex-col h-full gap-8">
+            {/* Search input and button */}
             <div className="flex gap-2">
               <Input
                 placeholder="Search your favourite song"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="border-2 border-gray-200 dark:border-gray-900 shadow-none "
               />
               <Button
-                onClick={() => setDebouncedSearchTerm(searchTerm.trim())}
                 disabled={isLoading}
+                onClick={() =>
+                  setSearchTerm(searchTerm.trim())
+                } /* trigger immediate search */
               >
                 {isLoading ? (
                   <span className="flex items-center gap-2">
@@ -104,12 +144,14 @@ export function AddSongButton() {
               </Button>
             </div>
 
+            {/* Display error message, if any */}
             {error && (
               <div className="text-sm text-muted-foreground flex justify-center items-center h-96 w-full">
                 {error}
               </div>
             )}
 
+            {/* Scrollable area to list videos or messages */}
             <ScrollArea className="h-96 w-full rounded-md border p-4 overflow-hidden flex justify-center items-center">
               {isLoading && (
                 <div className="text-sm text-muted-foreground flex justify-center items-center h-96 w-full">
@@ -123,11 +165,12 @@ export function AddSongButton() {
                 </div>
               )}
 
+              {/* Render list of videos */}
               {!isLoading &&
                 videos.map((video) => (
                   <div
                     key={video.videoId}
-                    className="mb-4 flex items-center gap-4"
+                    className="mb-4 flex items-center gap-4 hover:bg-accent"
                   >
                     <img
                       src={video.image}

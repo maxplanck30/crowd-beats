@@ -14,7 +14,7 @@ app.use(
   })
 );
 
-app.get("/", (c) => {
+app.get("/test", (c) => {
   return c.text("Hello Hono!");
 });
 
@@ -24,7 +24,9 @@ app.get("/api/search/yt/:searchTerm", async (c) => {
   const response = await fetch(
     `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&q=${encodeURIComponent(
       searchTerm
-    )}&key=${process.env.YOUTUBE_API_KEY}`
+    )}&fields=items(id/videoId,snippet/title,snippet/description,snippet/channelTitle,snippet/thumbnails/high/url)&key=${
+      process.env.YOUTUBE_API_KEY
+    }`
   );
 
   if (!response.ok) {
@@ -39,6 +41,7 @@ app.get("/api/search/yt/:searchTerm", async (c) => {
   return c.json(
     {
       data: cleanYTData(data.items),
+      new: data.items
     },
     200
   );

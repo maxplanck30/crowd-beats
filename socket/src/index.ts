@@ -6,6 +6,8 @@ import { Server } from "socket.io";
 import { Server as HttpServer } from "http";
 import { cors } from "hono/cors";
 import { cleanYTData } from "./lib/utils.js";
+import { initkafka, producer } from "./lib/kafka-config.js";
+import { redis } from "./lib/redis-config.js";
 const app = new Hono();
 
 app.use(
@@ -28,7 +30,7 @@ app.get("/api/search/yt/:searchTerm", async (c) => {
       process.env.YOUTUBE_API_KEY
     }`
   );
-  console.log(response)
+  console.log(response);
   if (!response.ok) {
     return c.json(
       {
@@ -65,6 +67,8 @@ const ioServer = new Server(server as HttpServer, {
   },
 });
 
+initkafka(ioServer);
+
 ioServer.on("error", (err) => {
   console.log(err);
 });
@@ -73,18 +77,41 @@ ioServer.on("connection", (socket) => {
   console.log(`${socket.id}: connected`);
   // Called when user join room
 
-  socket.on("join-room", (data) => {
+  socket.on("join-room", async (data) => {
     const { userId, roomId } = data;
     if (!userId || !roomId) {
       socket.emit("error", { message: "Missing userId or roomId" });
       return;
     }
     socket.join(roomId);
+    const songs = await redis.lrange(`room:${roomId}:songs`, 0, -1);
+    socket.emit(
+      "sync-queue",
+      songs.map((s) => JSON.parse(s))
+    );
+
     socket.emit("joined-room", roomId);
   });
-  socket.on("add-song", (data) => {
-    // check if same id exists in redis
+  socket.on("add-song", async (data) => {
+    await producer.send({
+      topic: "song-events",
+      messages: [
+        {
+          value: JSON.stringify({
+            type: "add-song",
+            roomId: data.room,
+            song: data,
+          }),
+        },
+      ],
+    });
     socket.to(data.room).emit("new-song", data);
+  });
+  socket.on("clear-room", async (roomId) => {
+    await producer.send({
+      topic: "song-events",
+      messages: [{ value: JSON.stringify({ type: "clear-room", roomId }) }],
+    });
   });
 });
 

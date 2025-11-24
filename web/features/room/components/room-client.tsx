@@ -42,29 +42,34 @@ export function RoomClient() {
   useEffect(() => {
     if (!user || !socket) return;
 
-    // Emit join-room event when socket connects
     const onConnect = () => {
       socket.emit("join-room", { userId: user.id, roomId });
       console.log("Socket connected and join-room emitted");
     };
     socket.on("connect", onConnect);
 
-    // Event listeners
     socket.on("joined-room", (data) => {
       console.log("Joined room confirmed:", data);
     });
-    socket.on("new-song", (data: TSong) => {
-      console.log(data);
-      setQueue((prev) => [...prev, data]);
+
+    socket.on("sync-queue", (songs: TSong[]) => {
+      console.log("Syncing queue from server:", songs);
+      setQueue(songs); // Replace full queue with persisted data
     });
+
+    socket.on("new-song", (data: TSong) => {
+      console.log("New song received", data);
+      setQueue((prev) => [...prev, data]); // Append newly added song
+    });
+
     socket.on("error", (error) => {
       console.error("Socket error:", error);
     });
 
-    // Cleanup event listeners on unmount or deps change
     return () => {
       socket.off("connect", onConnect);
       socket.off("joined-room");
+      socket.off("sync-queue");
       socket.off("new-song");
       socket.off("error");
     };
@@ -103,7 +108,7 @@ export function RoomClient() {
   return (
     <Container className="h-full w-full flex flex-col px-4 space-y-6 md:space-y-8 relative overflow-hidden max-h-[calc(100dvh-5rem)] min-h-[calc(100dvh-5rem)]">
       <AddSongButton addSong={addSong} />
-      <SongQueue queue={queue} user={user!}/>
+      <SongQueue queue={queue} user={user!} />
       <div>{roomId}</div>
       <div>{isAdmin ? <p>Admin</p> : <p>not admin</p>}</div>
     </Container>

@@ -91,6 +91,7 @@ export function RoomClient() {
     const payload = {
       id: uuid(),
       author: user.name,
+      authorId: user.id,
       data,
       room: roomId,
       isPlayed: false,
@@ -102,7 +103,7 @@ export function RoomClient() {
   return (
     <Container className="h-full w-full flex flex-col px-4 space-y-6 md:space-y-8 relative overflow-hidden max-h-[calc(100dvh-5rem)] min-h-[calc(100dvh-5rem)]">
       <AddSongButton addSong={addSong} />
-      <SongQueue queue={queue} />
+      <SongQueue queue={queue} user={user!}/>
       <div>{roomId}</div>
       <div>{isAdmin ? <p>Admin</p> : <p>not admin</p>}</div>
     </Container>

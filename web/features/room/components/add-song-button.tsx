@@ -20,7 +20,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { backendUrl } from "@/lib/backend";
 
 // Custom hook for debouncing a value with specified delay
-function useDebounce(value: string, delay: number = 200) {
+function useDebounce(value: string, delay: number = 1000) {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
@@ -83,6 +83,7 @@ export function AddSongButton({
         }
 
         const res = await response.json();
+        console.log(res);
         setVideos(res.data || []);
       } catch {
         setError("Something went wrong while fetching videos.");

@@ -1,6 +1,7 @@
 export type TSong = {
   id: string;
   author: string;
+  authorId: string;
   room: string;
   isPlayed: boolean;
   upvotes: number;

@@ -28,6 +28,7 @@ app.get("/api/search/yt/:searchTerm", async (c) => {
       process.env.YOUTUBE_API_KEY
     }`
   );
+  console.log(response)
   if (!response.ok) {
     return c.json(
       {
@@ -83,7 +84,7 @@ ioServer.on("connection", (socket) => {
   });
   socket.on("add-song", (data) => {
     // check if same id exists in redis
-    ioServer.in(data.room).emit("new-song", data);
+    socket.to(data.room).emit("new-song", data);
   });
 });
 

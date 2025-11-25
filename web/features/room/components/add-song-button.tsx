@@ -171,10 +171,10 @@ export function AddSongButton({
 
               {/* Render list of videos */}
               {!isLoading &&
-                videos.map((video) => (
+                videos.map((video, index) => (
                   <div
-                    key={video.videoId}
-                    className="mb-4 flex items-center gap-4 hover:bg-accent hover:cursor-pointer"
+                    key={video.videoId + index}
+                    className="mb-4 flex items-center gap-4 hover:bg-accent hover:cursor-pointer p-4"
                     onClick={() => {
                       addSong(video);
                     }}
@@ -182,7 +182,7 @@ export function AddSongButton({
                     <img
                       src={video.image}
                       alt={video.author}
-                      className="w-20 h-20 object-cover rounded"
+                      className="w-30 aspect-video object-cover rounded object-center"
                     />
                     <div>
                       <p className="font-semibold line-clamp-2">

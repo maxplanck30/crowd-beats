@@ -14,7 +14,7 @@ export function SongQueue({ queue, user }: { queue: TSong[]; user: User }) {
             <img
               src={song.data.image}
               alt={song.data.title}
-              className="w-20 h-20 object-cover rounded"
+              className="w-30 aspect-video object-cover rounded object-center"
             />
             <div>
               <p className="font-semibold line-clamp-2">{song.data.title}</p>

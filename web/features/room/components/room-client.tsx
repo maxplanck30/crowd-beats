@@ -331,7 +331,7 @@ export function RoomClient() {
     height: "390",
     width: "640",
     playerVars: {
-      controls: 0,
+      controls: 1,
       disablekb: 1,
       enablejsapi: 1,
       fs: 0,
@@ -355,6 +355,9 @@ export function RoomClient() {
           videoId={playingSong.data.videoId}
           opts={opts}
           onReady={onReady}
+          onEnd={() => {
+            playNext();
+          }}
         />
       )}
 

@@ -1,3 +1,6 @@
+import type { Redis } from "ioredis";
+import { redis } from "./redis-config.js";
+
 export function cleanYTData(data: Array<any>) {
   return data.map((ytItem) => {
     const { id, snippet } = ytItem;
@@ -9,4 +12,33 @@ export function cleanYTData(data: Array<any>) {
       author: snippet.channelTitle,
     };
   });
+}
+
+export async function getAllSongsInRoom(roomId: string) {
+  const songIds = await redis.lrange(`room:${roomId}:queue`, 0, -1);
+
+  // Fetch all songs hashes in parallel
+  const songs = await Promise.all(
+    songIds.map(async (id) => {
+      const songHash = await redis.hgetall(`song:${id}`);
+      return {
+        id: songHash.id,
+        author: songHash.author,
+        authorId: songHash.authorId,
+        room: songHash.room,
+        isPlayed: songHash.isPlayed === "true",
+        upvotes: Number(songHash.upvotes),
+        upvotedBy: JSON.parse(songHash.upvotedBy || "[]"),
+        data: {
+          videoId: songHash.videoId,
+          image: songHash.image,
+          title: songHash.title,
+          description: songHash.description,
+          author: songHash.songAuthor,
+        },
+      };
+    })
+  );
+
+  return songs;
 }

@@ -120,7 +120,7 @@ export function RoomClient() {
         )
       }
       <AddSongButton addSong={addSong} />
-      <SongQueue queue={queue} user={user!} toggleLike={toggleLike} />
+      <SongQueue queue={queue || []} user={user!} toggleLike={toggleLike} />
       <div>{roomId}</div>
     </Container>
   );

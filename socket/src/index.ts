@@ -5,7 +5,7 @@ import { Hono } from "hono";
 import { Server } from "socket.io";
 import { Server as HttpServer } from "http";
 import { cors } from "hono/cors";
-import { cleanYTData } from "./lib/utils.js";
+import { cleanYTData, getAllSongsInRoom } from "./lib/utils.js";
 import { initkafka, producer } from "./lib/kafka-config.js";
 import { redis } from "./lib/redis-config.js";
 const app = new Hono();
@@ -83,26 +83,25 @@ ioServer.on("connection", (socket) => {
       return;
     }
     socket.join(roomId);
-    const songs = await redis.lrange(`room:${roomId}:songs`, 0, -1);
-    const parsedSongs = songs.map((s) => JSON.parse(s));
-    console.log("Sync queue");
+    const parsedSongs = await getAllSongsInRoom(roomId)
     socket.emit("sync-queue", parsedSongs);
 
     socket.emit("joined-room", roomId);
   });
   socket.on("add-song", async (data) => {
-    const songsInRoom = await redis.lrange(`room:${data.room}:songs`, 0, -1);
-    // Check if any song matches the incoming song's videoId
-    const songExists = songsInRoom.some((songStr) => {
-      const song = JSON.parse(songStr);
-      return song.data.videoId === data.data.videoId;
-    });
+    // Get song IDs in room queue
+    const songIds = await redis.lrange(`room:${data.room}:queue`, 0, -1);
 
-    if (songExists) {
-      // Optionally emit an error or ignore adding duplicate
-      socket.emit("error", { message: "Song already exists in room." });
-      return;
+    // Check duplicate videoId by fetching hashes one by one
+    for (const id of songIds) {
+      const songHash = await redis.hgetall(`song:${id}`);
+      if (songHash.videoId === data.data.videoId) {
+        socket.emit("error", { message: "Song already exists in room." });
+        return;
+      }
     }
+
+    // No duplicate, send Kafka message
     await producer.send({
       topic: "song-events",
       messages: [
@@ -116,8 +115,8 @@ ioServer.on("connection", (socket) => {
       ],
     });
   });
+
   socket.on("toggle-like", async (data) => {
-    console.log("like")
     //     {
     //   songId: '7b4a8d33-a6c6-486a-97b2-4328a4cb94e8',
     //   userId: 'p12fWNMnxZRZkU6NwDtZ3MmFKqBUcK6U',

@@ -24,10 +24,26 @@ export async function initkafka(
 
       switch (event.type) {
         case "add-song":
-          await redis.rpush(
-            `room:${event.roomId}:songs`,
-            JSON.stringify(event.song)
-          );
+          // Save song data as hash
+          await redis.hset(`song:${event.song.id}`, {
+            id: event.song.id,
+            author: event.song.author,
+            authorId: event.song.authorId,
+            room: event.song.room,
+            isPlayed: event.song.isPlayed.toString(),
+            upvotes: event.song.upvotes.toString(),
+            upvotedBy: JSON.stringify(event.song.upvotedBy),
+            videoId: event.song.data.videoId,
+            image: event.song.data.image,
+            title: event.song.data.title,
+            description: event.song.data.description,
+            songAuthor: event.song.data.author,
+          });
+
+          // Add song ID to room queue list
+          await redis.rpush(`room:${event.roomId}:queue`, event.song.id);
+
+          // Notify clients in room
           ioServer.in(event.roomId).emit("new-song", event.song);
           break;
 

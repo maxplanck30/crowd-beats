@@ -1,11 +1,12 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TSong } from "@/lib/types";
 import { User } from "better-auth";
-import { HeartIcon, HeartPulseIcon } from "lucide-react";
+import { HeartIcon, HeartPulseIcon, User2Icon } from "lucide-react";
+import { PlayingLines } from "./playing-lines";
 
 export function SongQueue({ queue, user }: { queue: TSong[]; user: User }) {
   return (
-    <div className="h-full w-full flex-1 overflow-x-hidden overflow-y-auto custom-scrollbar py-4">
+    <div className="h-full w-full flex-1  overflow-y-auto custom-scrollbar py-4">
       {queue.map((song) => {
         let likedByMe = false;
         if (song.upvotedBy && song.upvotedBy.includes(user.id))
@@ -14,21 +15,22 @@ export function SongQueue({ queue, user }: { queue: TSong[]; user: User }) {
         return (
           <div
             key={song.id}
-            className="mb-4 flex items-center gap-4 hover:bg-accent hover:cursor-pointer p-2"
+            className="flex items-center gap-4 hover:bg-accent hover:cursor-pointer w-full h-full border-b-2 first:border-t-2 p-2"
           >
             <img
               src={song.data.image}
               alt={song.data.title}
               className="w-30 aspect-video object-cover rounded object-center"
             />
-            <div>
+            <div className="w-full">
               <p className="font-semibold line-clamp-2">{song.data.title}</p>
               <p className="text-sm font-extralight line-clamp-1 text-gray-700 dark:text-gray-400">
                 {song.data.description}
               </p>
               <div className="flex justify-between items-center px-4">
-                <p className="text-xs text-gray-600">
-                  {song.authorId === user.id ? "You" : song.author}
+                <p className="text-xs text-gray-600 dark:text-gray-200 font-bold flex justify-center items-center gap-2">
+                  <User2Icon size={10} />
+                  <span>{song.authorId === user.id ? "You" : song.author}</span>
                 </p>
                 <p className="flex justify-center items-center gap-4">
                   {likedByMe ? (
@@ -40,7 +42,7 @@ export function SongQueue({ queue, user }: { queue: TSong[]; user: User }) {
                     <HeartIcon className="" size={20} />
                   )}
                   {song.upvotes || 0}
-                  {likedByMe}
+                  {!song.isPlayed && <PlayingLines />}
                 </p>
               </div>
             </div>

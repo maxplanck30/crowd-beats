@@ -86,14 +86,12 @@ ioServer.on("connection", (socket) => {
     const songs = await redis.lrange(`room:${roomId}:songs`, 0, -1);
     const parsedSongs = songs.map((s) => JSON.parse(s));
     console.log("Sync queue");
-    socket.emit("test", null);
     socket.emit("sync-queue", parsedSongs);
 
     socket.emit("joined-room", roomId);
   });
   socket.on("add-song", async (data) => {
     const songsInRoom = await redis.lrange(`room:${data.room}:songs`, 0, -1);
-
     // Check if any song matches the incoming song's videoId
     const songExists = songsInRoom.some((songStr) => {
       const song = JSON.parse(songStr);
@@ -105,7 +103,6 @@ ioServer.on("connection", (socket) => {
       socket.emit("error", { message: "Song already exists in room." });
       return;
     }
-    console.log(data);
     await producer.send({
       topic: "song-events",
       messages: [

@@ -15,7 +15,6 @@ export function RoomClient() {
   const [user, setUser] = useState<null | User>(null);
   const [queue, setQueue] = useState<TSong[]>([]);
   const socketRef = useRef<Socket | null>(null);
-
   const router = useRouter();
   const { roomId } = useParams<{ roomId: string }>();
 
@@ -27,7 +26,7 @@ export function RoomClient() {
     const getSession = async () => {
       const { data: session } = await authClient.getSession();
       if (!session) {
-        return router.replace(`/login/rooms=${roomId}`);
+        return router.replace(`/login?rooms=${roomId}`);
       }
       setUser(session.user);
     };
@@ -38,10 +37,7 @@ export function RoomClient() {
     if (!user || !roomId) return;
 
     // Create socket connection directly
-    const socket = io("http://localhost:3001", {
-      // optional options here if needed
-      autoConnect: false,
-    });
+    const socket = io("http://localhost:3001", {});
     socketRef.current = socket;
 
     const onConnect = () => {
@@ -102,6 +98,17 @@ export function RoomClient() {
 
   return (
     <Container className="h-full w-full flex flex-col px-4 space-y-6 md:space-y-8 relative overflow-hidden max-h-[calc(100dvh-5rem)] min-h-[calc(100dvh-5rem)]">
+      {
+        // check if admin
+        user?.id === roomId && (
+          <iframe
+            width="420"
+            height="315"
+            src="https://www.youtube.com/embed/tgbNymZ7vqY"
+            className="w-full object-cover object-center hidden"
+          ></iframe>
+        )
+      }
       <AddSongButton addSong={addSong} />
       <SongQueue queue={queue} user={user!} />
       <div>{roomId}</div>

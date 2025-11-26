@@ -72,7 +72,7 @@ export function RoomClient() {
         const updatedQueue = [...prev, data];
 
         // If queue was empty before, set current playing song
-        if (!currentPlayingSong) {
+        if (prev.length <= 0) {
           setCurrentPlayingSong(data.id);
         }
 

@@ -64,7 +64,14 @@ export function RoomClient() {
   };
 
   useEffect(() => {
-    if (!playerRef.current || !playerReady) return;
+    if (!playerRef.current) {
+      console.log("Player ref is null, skipping loadVideoById");
+      return;
+    }
+    if (!playerReady) {
+      console.log("Player not ready, skipping loadVideoById");
+      return;
+    }
     const currentSong = getSongById(currentPlayingSong);
     if (currentSong?.data.videoId) {
       playerRef.current.loadVideoById(currentSong.data.videoId);
@@ -113,9 +120,11 @@ export function RoomClient() {
           : new MaxHeap<TSong>(comparator);
 
         if (!playingSong) {
+          if (playerRef.current) playerRef.current.stopVideo();
           setPlayingSong(song);
           setCurrentPlayingSong(song.id);
-          // Since this is the first song and playing, do NOT add to heap to avoid duplicate
+          setIsPlaying(true);
+          setPlayerReady(false);
           return heap;
         }
 
@@ -123,7 +132,6 @@ export function RoomClient() {
         if (!song.isPlayed && !exists) {
           heap.push(song);
         }
-
         return heap;
       });
     });

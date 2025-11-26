@@ -1,8 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRightCircle, PauseCircle, PlayCircle } from "lucide-react";
+import {
+  ArrowRightCircle,
+  PauseCircle,
+  PlayCircle,
+  QrCode,
+  Trash2,
+} from "lucide-react";
+import { ShowQrButton } from "./show-qr-button";
 
 type TSongControlsProps = {
   currentPlayingSong: string;
+  name: string;
+  id: string;
   isPlaying: boolean;
   playNext: () => void;
   togglePlay: () => void;
@@ -10,6 +19,8 @@ type TSongControlsProps = {
 
 export function SongControls({
   currentPlayingSong,
+  name,
+  id,
   isPlaying,
   playNext,
   togglePlay,
@@ -38,6 +49,7 @@ export function SongControls({
         <ArrowRightCircle className="size-8" />
         <span className="hidden md:block">Play Next</span>
       </Button>
+      <ShowQrButton name={name} id={id} />
     </div>
   );
 }

@@ -203,6 +203,27 @@ ioServer.on("connection", (socket) => {
 
     console.timeEnd(`play-next-${data.songId}`);
   });
+
+  socket.on("clear-queue", async (data) => {
+    if (data.userId !== data.roomId) {
+      socket.emit("error", {
+        message: "Only room owner can perform this action",
+      });
+      return;
+    }
+    await producer.send({
+      topic: "song-events",
+      messages: [
+        {
+          value: JSON.stringify({
+            type: "clear-queue",
+            roomId: data.roomId,
+            data,
+          }),
+        },
+      ],
+    });
+  });
 });
 
 // all events join-room joined-room error

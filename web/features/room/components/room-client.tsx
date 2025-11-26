@@ -112,15 +112,13 @@ export function RoomClient() {
           ? prevHeap.clone()
           : new MaxHeap<TSong>(comparator);
 
-        if (!playingSong && song.isPlayed) {
+        if (!playingSong) {
           setPlayingSong(song);
           setCurrentPlayingSong(song.id);
-        } else if (!playingSong && heap.size() === 0) {
-          setPlayingSong(song);
-          setCurrentPlayingSong(song.id);
+          // Since this is the first song and playing, do NOT add to heap to avoid duplicate
+          return heap;
         }
 
-        // Avoid adding duplicate songs
         const exists = heap.toArray().some((s) => s.id === song.id);
         if (!song.isPlayed && !exists) {
           heap.push(song);
@@ -356,13 +354,17 @@ export function RoomClient() {
           opts={opts}
           onReady={onReady}
           onEnd={() => {
+            setIsPlaying(false);
             playNext();
           }}
+          className="hidden"
         />
       )}
 
       {user?.id === roomId && (
         <SongControls
+          name={user.name}
+          id={user.id}
           playNext={playNext}
           isPlaying={isPlaying}
           togglePlay={togglePlay}

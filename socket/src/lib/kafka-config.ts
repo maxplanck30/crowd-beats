@@ -103,7 +103,7 @@ export async function initkafka(
 
           break;
 
-        case "clear-room":
+        case "clear-queue":
           await redis.del(`room:${event.roomId}:songs`);
           ioServer.in(event.roomId).emit("clear-queue");
           break;

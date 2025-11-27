@@ -91,10 +91,10 @@ export async function initkafka(
           const pnData = event.data;
           const roomKey = `room:${pnData.roomId}:queue`;
 
-          // ✅ Get current queue BEFORE changes
+          // Get current queue BEFORE changes
           const currentQueue = await redis.lrange(roomKey, 0, -1);
 
-          // ✅ Validate newSongId exists in queue
+          // Validate newSongId exists in queue
           if (!currentQueue.includes(pnData.newSongId)) {
             console.log("Invalid newSongId or last song, skipping");
             // Still remove old song if it exists
@@ -105,7 +105,7 @@ export async function initkafka(
             return;
           }
 
-          // ✅ Normal flow: remove old, mark new as played
+          //   Normal flow: remove old, mark new as played
           await redis.lrem(roomKey, 0, pnData.oldSongId);
           await redis.del(`song:${pnData.oldSongId}`);
           await redis.hset(`song:${pnData.newSongId}`, "isPlayed", "true");
@@ -121,22 +121,22 @@ export async function initkafka(
           const roomId = event.roomId;
           const roomk = `room:${roomId}:queue`;
 
-          // ✅ 1. Get all song IDs in queue
+          //   1. Get all song IDs in queue
           const songIds = await redis.lrange(roomk, 0, -1);
 
-          // ✅ 2. Delete all song hashes
+          //   2. Delete all song hashes
           for (const songId of songIds) {
             await redis.del(`song:${songId}`);
           }
 
-          // ✅ 3. Delete the entire queue list
+          //   3. Delete the entire queue list
           await redis.del(roomk);
 
           console.log(
             `Cleared queue for room ${roomId}, deleted ${songIds.length} songs`
           );
 
-          // ✅ 4. Notify all clients in room
+          //   4. Notify all clients in room
           ioServer.in(roomId).emit("clear-queue");
           break;
       }

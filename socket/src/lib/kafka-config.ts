@@ -5,7 +5,7 @@ import { Server, type DefaultEventsMap } from "socket.io";
 import { redis } from "./redis-config.js";
 import { getAllSongsInRoom, getSong } from "./utils.js";
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = process.env.NODE_Env === "production";
 const kafkaUrl = process.env.KAFKA_URL!;
 
 export const kafka = new Kafka({

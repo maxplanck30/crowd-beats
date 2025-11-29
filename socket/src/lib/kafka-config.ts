@@ -6,7 +6,7 @@ import { getAllSongsInRoom, getSong } from "./utils.js";
 import fs from "fs";
 import path from "path";
 
-const isProduction = process.env.NODE_ENV === "production"; // Fixed typo: NODE_Env -> NODE_ENV
+const isProduction = process.env.NODE_Env === "production"; 
 const kafkaUrl = process.env.KAFKA_URL!;
 
 export const kafka = new Kafka({

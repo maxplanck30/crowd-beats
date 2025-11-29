@@ -15,4 +15,4 @@ if (!isProduction) {
   });
 }
 
-export default redis;
+export  {redis};

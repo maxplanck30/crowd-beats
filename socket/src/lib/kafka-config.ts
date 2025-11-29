@@ -1,25 +1,32 @@
 import "dotenv/config";
-
 import { Kafka } from "kafkajs";
 import { Server, type DefaultEventsMap } from "socket.io";
 import { redis } from "./redis-config.js";
 import { getAllSongsInRoom, getSong } from "./utils.js";
+import fs from "fs";
+import path from "path";
 
-const isProduction = process.env.NODE_Env === "production";
+const isProduction = process.env.NODE_ENV === "production"; // Fixed typo: NODE_Env -> NODE_ENV
 const kafkaUrl = process.env.KAFKA_URL!;
 
 export const kafka = new Kafka({
   clientId: "app",
-  brokers: isProduction ? [kafkaUrl] : ["localhost:9092"], // Docker Kafka
+  brokers: isProduction ? [kafkaUrl] : ["localhost:9092"],
   ...(isProduction && {
-    ssl: true,
+    ssl: {
+      rejectUnauthorized: true, 
+      ca: [fs.readFileSync(path.join(process.cwd(), "cert/ca.pem"))],
+    },
     sasl: {
-      mechanism: "plain", 
+      mechanism: "plain",
       username: process.env.KAFKA_USERNAME!,
       password: process.env.KAFKA_PASSWORD!,
     },
   }),
 });
+
+// ... rest of your code unchanged
+
 export const consumer = kafka.consumer({ groupId: "socket-group" });
 export const producer = kafka.producer();
 

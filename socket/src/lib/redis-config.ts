@@ -2,10 +2,9 @@ import "dotenv/config";
 
 import { Redis } from "ioredis";
 let redis: Redis;
-const redisURL = process.env.REDIS_URL || "http://localhost:6379";
 const isProduction = process.env.NODE_Env === "production";
 if (!isProduction) {
-  redis = new Redis(redisURL);
+  redis = new Redis();
 } else {
   redis = new Redis({
     username: process.env.REDIS_USERNAME!,
@@ -15,4 +14,4 @@ if (!isProduction) {
   });
 }
 
-export  {redis};
+export { redis };

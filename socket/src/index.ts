@@ -31,6 +31,7 @@ app.get("/api/search/yt/:searchTerm", async (c) => {
     }`
   );
   if (!response.ok) {
+    console.log(response)
     return c.json(
       {
         data: null,
